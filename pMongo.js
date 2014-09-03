@@ -41,6 +41,20 @@ pMongo.prototype.findOne = function(_id)
 	return null;
 };
 
+pMongo.prototype.findIndex = function(_id)
+{
+	if(!_id) return -1;
+
+	for(var i = 0; i < this.count(); i++)
+	{
+		var doc = this.getByIndex(i);
+		if(doc._id == _id)
+			return i;
+	}
+
+	return -1;
+};
+
 pMongo.prototype.getByIndex = function(index)
 {
 	if(typeof index == "undefined") return null;
