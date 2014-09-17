@@ -1,3 +1,13 @@
+var sift;
+
+if(typeof window != "undefined" && window.sift)
+	sift = window.sift;
+else if(typeof window == "undefined" && typeof require == "function")
+	sift = require("sift");
+else {
+	throw new Error('sift.js(https://github.com/crcn/sift.js) required. please include it to your app.')
+}
+
 function uuid(a){return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,uuid)}
 
 var pMongo = function()
@@ -243,4 +253,14 @@ pMongo.prototype.iterate = function(query, fn, end)
 		end();
 };
 
-module.exports = pMongo;
+pMongo.prototype.sift = function(query)
+{
+	if(typeof query == "undefined")
+		query = {};
+	return sift(query, this.data_store);
+};
+
+if(typeof module != "undefined")
+	module.exports = pMongo;
+else
+	window.pMongo = pMongo;
