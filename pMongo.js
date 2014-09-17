@@ -223,3 +223,24 @@ pMongo.prototype.removeById = function(_id)
 
 	return true;
 };
+
+pMongo.prototype.iterate = function(query, fn, end)
+{
+	if(typeof query == "function")
+	{
+		fn = query;
+		query = {};
+	} else if (typeof query != "object") {
+		throw new Error('query must be a object');
+	}
+	if(typeof fn != "function")
+	{
+		throw new Error('callback have to be a function');
+	}
+	var docs = this.find(query);
+	docs.forEach(fn);
+	if(typeof end == "function")
+		end();
+};
+
+module.exports = pMongo;
