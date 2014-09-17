@@ -1,11 +1,11 @@
-var sift;
+var sift, _;
 
-if(typeof window != "undefined" && window.sift)
+if(typeof window != "undefined" && typeof window.sift != "undefined") {
 	sift = window.sift;
-else if(typeof window == "undefined" && typeof require == "function")
+} else if(typeof window == "undefined" && typeof require == "function") {
 	sift = require("sift");
-else {
-	throw new Error('sift.js(https://github.com/crcn/sift.js) required. please include it to your app.')
+} else {
+	throw new Error('sift.js(https://github.com/crcn/sift.js) required. please include it into your app.');
 }
 
 function uuid(a){return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,uuid)}
@@ -14,7 +14,7 @@ var pMongo = function()
 {
 	this.data_store = []; // simple array
 	this.do_not_add_if_exists = false;
-}
+};
 
 pMongo.prototype.count = function()
 {
@@ -75,84 +75,50 @@ pMongo.prototype.getByIndex = function(index)
 	return this.data_store[index];
 };
 
-pMongo.prototype.docIsMatching = function(doc, conds, limit_, skip_)
+pMongo.prototype.docIsMatching = function(doc, conds)
 {
-	for(var c in conds)
-	{
-		var cond = conds[c];
-
-		switch(typeof cond)
-		{
-			case "object":
-			{
-				var gt, gte, lt, lte;
-
-				for(k in cond)
-				{
-					switch(k)
-					{
-						case "$gt": // greater than
-						case "$gte": // greater than or equal
-						case "$lt": // less than or equal
-						case "$lte": // less than or equal
-						{
-							if(typeof cond[k] != "number")
-								throw "$gt, $gte, $lt and $lte queries require number";
-							if(typeof doc[c] != "number")
-								return false;
-
-							if( (k == "$gt" && doc[c] <= cond[k]) || (k == "$gte" && doc[c] < cond[k])
-							  || (k == "$lt" && doc[c] >= cond[k]) || (k == "$lte" && doc[c] > cond[k]))
-
-								return false;
-						} break;
-						case "$in":
-						case "$nin":
-						{
-							if(typeof doc[c] != "object")
-								return false;
-							if (!(doc[c] instanceof Array))
-								return false;
-
-							if((k == "$in" && doc[c].indexOf(cond[k]) < 0)
-						    || (k == "$nin" && doc[c].indexOf(cond[k]) >= 0))
-								return false;
-						} break;
-					}
-				}
-
-			} break;
-			default:
-				if(doc[c] != cond)
-					return false;
-		}
-	}
-
-	return true;
-}
+	return sift(conds, [doc]).length === 1 ? true : false;
+};
 
 
 pMongo.prototype.find = function(conds, limit_, skip_)
 {
-	if(!conds) return null;
-
 	var count = this.count();
 	var limit = count
 	  , skip = 0;
 
-	if(skip_) skip = skip_;
-	if(limit_)	limit = limit_;
-
-	var results = [];
-
-	for(var i = 0; i < count; i++)
+	if(typeof conds == "undefined")
 	{
-		var doc = this.getByIndex(i)
+		if(typeof conds == "number") limit = conds;
+		if(typeof limit_ == "number") skip = limit_;
+		conds = {};
+	} else if(typeof conds == "object") {
+		if(typeof limit_ == "number") limit = limit_;
+		if(typeof skip_ == "number") skip = skip_;
+	} else if (typeof conds == "function") {
+		this.iterate(conds);
+	} else {
+		throw new Error('first argument have to be o either object(query), number(limit), function(iterates all records)');
+	}
 
-		var is_matching = this.docIsMatching(doc, conds, limit, skip);
+	var results = sift(conds, this.data_store);
+	
+	if(skip > 0)
+	{
+		while(skip--)
+			results = results.shift();
+	}
 
-		if(is_matching === true)
-			results.push(doc);
+	if(typeof results == "undefined")
+		results = [];
+	else if(limit < results.length) {
+		while(limit--)
+			results = results.pop();
+	}
+
+	if(typeof results == "undefined")
+	{
+		results = [];
 	}
 
 	return results;
@@ -201,7 +167,7 @@ pMongo.prototype.update = function(conds, fields)
 			}
 		}
 	}
-}
+};
 
 
 pMongo.prototype.remove = function(conds)
@@ -251,13 +217,6 @@ pMongo.prototype.iterate = function(query, fn, end)
 	docs.forEach(fn);
 	if(typeof end == "function")
 		end();
-};
-
-pMongo.prototype.sift = function(query)
-{
-	if(typeof query == "undefined")
-		query = {};
-	return sift(query, this.data_store);
 };
 
 if(typeof module != "undefined")
