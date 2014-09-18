@@ -1,4 +1,4 @@
-var sift, _;
+var sift;
 
 if(typeof window != "undefined" && typeof window.sift != "undefined") {
 	sift = window.sift;
@@ -12,6 +12,11 @@ function uuid(a){return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e
 
 var pMongo = function()
 {
+	this._init();
+};
+
+pMongo.prototype._init = function()
+{
 	this.data_store = []; // simple array
 	this.do_not_add_if_exists = false;
 };
@@ -19,6 +24,12 @@ var pMongo = function()
 pMongo.prototype.count = function()
 {
 	return this.data_store.length;
+};
+
+pMongo.prototype.reset = function()
+{
+	this._init();
+	return this;
 };
 
 pMongo.prototype.add = function(doc)
@@ -204,6 +215,7 @@ pMongo.prototype.iterate = function(query, fn, end)
 {
 	if(typeof query == "function")
 	{
+		end = fn;
 		fn = query;
 		query = {};
 	} else if (typeof query != "object") {
