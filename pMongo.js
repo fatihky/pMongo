@@ -18,7 +18,7 @@ var pMongo = function()
 pMongo.prototype._init = function()
 {
 	this.data_store = []; // simple array
-	this.do_not_add_if_exists = false;
+	this.update_if_exists = true;
 };
 
 pMongo.prototype.count = function()
@@ -41,8 +41,14 @@ pMongo.prototype.add = function(doc)
 		while(this.findOne(doc._id) !== null);
 	}
 
-	if(this.do_not_add_if_exists && this.findOne(doc._id) !== null)
-		return null;
+	if(this.findOne(doc._id) !== null)
+	{
+		if(this.update_if_exists)
+			return this.update({_id: doc._id}, doc);
+		else
+			return null;
+	}
+
 
 	this.data_store.push(doc);
 	return doc;
