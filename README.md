@@ -17,12 +17,25 @@ p.add({some:{other:{nested:{object: 256}}}});
 // you can specify query object as first argument here
 p.iterate(function(doc, i){ console.log("doc:", doc, "index:", i); })
 // iterate over query results
-p.iterate({"some.nested.object": 274}, function(doc, i){ console.log("doc:", doc, "index:", i); })
+p.iterate({"some.nested.object": 274}, function(doc, i)
+{
+  console.log("doc:", doc, "index:", i);
+})
 
 // now query records
 var results = p.find({"some.nested.object": 274});
-// results: [{"some":{"nested":{"object":274}},"_id":"0faa0a9a-18a6-429b-96d5-0a503ace47f9"}]
-
+/*
+  results: [
+  {
+    "some":{
+      "nested":{
+        "object":274
+      }
+    },
+    "_id":"0faa0a9a-18a6-429b-96d5-0a503ace47f9"
+  }
+  ]
+*/
 // lets remove first doc
 p.remove({_id: doc._id});
 
