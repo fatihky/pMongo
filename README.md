@@ -1,5 +1,6 @@
 pMongo
 ======
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/fatihky/pMongo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Portable mongodb implementation for browser and node.js
 It uses [shift.js](https://github.com/crcn/sift.js) as query engine and supports $push, $pop updates.
