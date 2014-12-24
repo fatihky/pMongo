@@ -161,6 +161,21 @@ pMongo.prototype.update = function(conds, fields)
 						{
 							switch(k)
 							{
+								case '$inc':
+								case '$dec':
+								{
+									if(typeof fields[j][k] == 'number') {
+										if(typeof this.data_store[i][j] == 'undefined')
+											this.data_store[i][j] = 0;
+										else if(typeof this.data_store[i][j] != 'number')
+											break;
+
+										if(k == '$inc')
+											this.data_store[i][j] += fields[j][k];
+										else
+											this.data_store[i][j] -= fields[j][k];
+									}
+								} break;
 								case "$push":
 								case "$pop":
 									if(this.data_store[i][j] instanceof Array)
